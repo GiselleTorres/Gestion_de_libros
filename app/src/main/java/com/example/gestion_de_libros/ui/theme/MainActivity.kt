@@ -27,11 +27,10 @@ import com.example.gestion_de_libros.Screen.CategoriaScreen
 import com.example.gestion_de_libros.Screen.LibroScreen
 import com.example.gestion_de_libros.Screen.PrestamoScreen
 import com.example.gestion_de_libros.Screen.UsuarioScreen
+import com.example.gestion_de_libros.Screen.InicioScreen
 import com.google.gson.GsonBuilder
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import com.example.gestion_de_libros.Screen.InicioScreen
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
@@ -60,12 +59,12 @@ class MainActivity : ComponentActivity() {
                 Surface {
                     val navController = rememberNavController()
 
-                    // Navegación principal
+                    // Usamos una ruta "start" sin parámetros como startDestination
                     NavHost(
                         navController = navController,
                         startDestination = "start"
                     ) {
-                        // Pantalla invisible al iniciar: redirige a menú de inicio
+                        // Pantalla inicial que redirige a inicio con token
                         composable("start") {
                             LaunchedEffect(Unit) {
                                 navController.navigate("inicio/$token") {
@@ -73,41 +72,39 @@ class MainActivity : ComponentActivity() {
                                 }
                             }
                         }
-                        // Menú de inicio con botones
                         composable(
                             route = "inicio/{token}",
                             arguments = listOf(navArgument("token") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val argToken = backStackEntry.arguments?.getString("token").orEmpty()
+                        ) { entry ->
+                            val argToken = entry.arguments?.getString("token").orEmpty()
                             InicioScreen(navController, argToken)
                         }
-                        // Rutas que reciben el token como argumento
                         composable(
                             route = "categorias/{token}",
                             arguments = listOf(navArgument("token") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val argToken = backStackEntry.arguments?.getString("token").orEmpty()
+                        ) { entry ->
+                            val argToken = entry.arguments?.getString("token").orEmpty()
                             CategoriaScreen(navController, catVm, argToken)
                         }
                         composable(
                             route = "libros/{token}",
                             arguments = listOf(navArgument("token") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val argToken = backStackEntry.arguments?.getString("token").orEmpty()
-                            LibroScreen(navController, libVm, argToken)
+                        ) { entry ->
+                            val argToken = entry.arguments?.getString("token").orEmpty()
+                            LibroScreen(navController, libVm, catVm, argToken)
                         }
                         composable(
                             route = "prestamos/{token}",
                             arguments = listOf(navArgument("token") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val argToken = backStackEntry.arguments?.getString("token").orEmpty()
+                        ) { entry ->
+                            val argToken = entry.arguments?.getString("token").orEmpty()
                             PrestamoScreen(navController, presVm, argToken)
                         }
                         composable(
                             route = "usuarios/{token}",
                             arguments = listOf(navArgument("token") { type = NavType.StringType })
-                        ) { backStackEntry ->
-                            val argToken = backStackEntry.arguments?.getString("token").orEmpty()
+                        ) { entry ->
+                            val argToken = entry.arguments?.getString("token").orEmpty()
                             UsuarioScreen(navController, usrVm, argToken)
                         }
                     }

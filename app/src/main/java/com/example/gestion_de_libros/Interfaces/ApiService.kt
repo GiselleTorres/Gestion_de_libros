@@ -8,6 +8,11 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 interface ApiService {
+    @POST("/api/libros")
+    suspend fun createLibro(
+        @Header("Authorization") token: String,
+        @Body libro: Libro
+    ): Response<Libro>
 
     @POST("/api/usuarios")
     suspend fun createUsuario(

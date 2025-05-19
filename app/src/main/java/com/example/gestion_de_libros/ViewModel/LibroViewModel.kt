@@ -21,5 +21,14 @@ class LibroViewModel (private val repo: LibroRepository) : ViewModel() {
             viewModelScope.launch {
                 _libros.value = repo.fetchLibros(token)
             }
+    }
+
+    // Método para agregar un libro
+    fun addLibro(token: String, libro: Libro, onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            val created = repo.createLibro(token, libro)
+            onResult(created != null)
+            loadLibros(token)
         }
+    }
 }
