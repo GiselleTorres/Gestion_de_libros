@@ -10,21 +10,9 @@ class   UsuarioRepository (private val api: ApiService) {
     suspend fun fetchUsuario(id: Long, token: String): Usuario? =
         api.getUsuario(id, "Bearer $token").body()
 
-
-    //ANterior
-    /*suspend fun obtenerUsuarios(): List<Usuario> {
-        return RetrofitClient.apiService.obtenerUsuarios()
+    //método para crear un usuario
+    suspend fun createUsuario(token: String, usuario: Usuario): Usuario? {
+        val response = api.createUsuario("Bearer $token", usuario)
+        return if (response.isSuccessful) response.body() else null
     }
-
-    suspend fun obtenerUsuario(id: Long): Usuario {
-        return RetrofitClient.apiService.obtenerUsuario(id)
-    }
-
-    suspend fun guardarUsuario(usuario: Usuario): Usuario {
-        return RetrofitClient.apiService.guardarUsuario(usuario)
-    }
-
-    suspend fun eliminarUsuario(id: Long) {
-        return RetrofitClient.apiService.eliminarUsuario(id)
-    }*/
 }

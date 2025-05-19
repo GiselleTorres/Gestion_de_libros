@@ -21,4 +21,13 @@ class UsuarioViewModel (private val repo: UsuarioRepository) : ViewModel(){
             _usuarios.value = repo.fetchUsuarios(token)
         }
     }
+    // método para agregar un usuario
+    fun addUsuario(token: String, usuario: Usuario, onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            val created = repo.createUsuario(token, usuario)
+            onResult(created != null)
+            // Refrescar lista tras creación
+            loadUsuarios(token)
+        }
+    }
 }

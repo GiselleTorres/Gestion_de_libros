@@ -22,42 +22,4 @@ class LibroViewModel (private val repo: LibroRepository) : ViewModel() {
                 _libros.value = repo.fetchLibros(token)
             }
         }
-
-    //Anterior
-
-   /* private val repository= LibroRepository()
-
-    private val _libros = MutableLiveData<List<Libro>?>(emptyList())
-    val libros: MutableLiveData<List<Libro>?> = _libros
-
-    fun obtenerLibros() {
-        viewModelScope.launch {
-            val librosList = withContext(Dispatchers.IO) {
-                repository.obtenerLibros()
-            }
-            _libros.postValue(librosList)
-        }
-    }
-
-    fun obtenerLibro(id: Libro) {
-        viewModelScope.launch {
-            val libro = withContext(Dispatchers.IO) {
-                repository.obtenerLibro(id)
-            }
-        }
-    }
-
-    fun guardarLibro(libro: Libro){
-        viewModelScope.launch {
-            repository.guardarLibro(libro)
-            obtenerLibros()
-        }
-    }
-
-    fun eliminarLibro(id: Long) {
-        viewModelScope.launch {
-            repository.eliminarLibro(id)
-            obtenerLibros()
-        }
-    }*/
 }

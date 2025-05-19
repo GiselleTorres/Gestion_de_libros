@@ -9,22 +9,6 @@ class PrestamoRepository (private val api: ApiService) {
     suspend fun fetchPrestamo(id: Long, token: String): Prestamo? =
         api.getPrestamo(id, "Bearer $token").body()
 
-    //Anterior
-    /*suspend fun obtenerPrestamos(): List<Prestamo> {
-        return RetrofitClient.apiService.obtenerPrestamos()
-    }
-
-    suspend fun obtenerPrestamo(id: Long): Prestamo {
-        return RetrofitClient.apiService.obtenerPrestamo(id)
-    }
-
-    suspend fun guardarPrestamo(prestamo: Prestamo): Prestamo {
-        return RetrofitClient.apiService.guardarPrestamo(prestamo)
-    }
-
-    suspend fun eliminarPrestamo(id: Long) {
-        RetrofitClient.apiService.eliminarPrestamo(id)
-    }*/
 }
 
 
