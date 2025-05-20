@@ -30,4 +30,19 @@ class UsuarioViewModel (private val repo: UsuarioRepository) : ViewModel(){
             loadUsuarios(token)
         }
     }
+    fun updateUsuario(token: String, usuario: Usuario, onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            val updated = repo.updateUsuario(token, usuario)
+            onResult(updated != null)
+            loadUsuarios(token)
+        }
+    }
+
+    fun deleteUsuario(token: String, id: Long, onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            val success = repo.deleteUsuario(token, id)
+            onResult(success)
+            loadUsuarios(token)
+        }
+    }
 }

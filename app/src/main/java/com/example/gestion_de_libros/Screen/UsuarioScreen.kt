@@ -19,7 +19,8 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -28,7 +29,9 @@ fun UsuarioScreen(
     vm: UsuarioViewModel,
     token: String
 ) {
-    var showAddDialog by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+    var isEditing by remember { mutableStateOf(false) }
+    var selectedUser by remember { mutableStateOf<Usuario?>(null) }
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var phone by remember { mutableStateOf("") }
@@ -46,7 +49,12 @@ fun UsuarioScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showAddDialog = true }) {
+                    IconButton(onClick = {
+                        isEditing = false
+                        selectedUser = null
+                        name = ""; email = ""; phone = ""
+                        showDialog = true
+                    }) {
                         Icon(Icons.Default.Add, contentDescription = "Agregar usuario")
                     }
                 }
@@ -59,26 +67,52 @@ fun UsuarioScreen(
                 .fillMaxSize()
                 .padding(8.dp)
         ) {
-            items(usuarios) { u ->
+            items(usuarios) { user ->
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(u.nombre, style = MaterialTheme.typography.titleMedium)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(u.email, style = MaterialTheme.typography.bodyMedium)
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(u.telefono, style = MaterialTheme.typography.bodySmall)
+                    Row(
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(user.nombre, style = MaterialTheme.typography.titleMedium)
+                            Spacer(Modifier.height(4.dp))
+                            Text(user.email, style = MaterialTheme.typography.bodyMedium)
+                            Spacer(Modifier.height(2.dp))
+                            Text(user.telefono, style = MaterialTheme.typography.bodySmall)
+                        }
+                        Row {
+                            IconButton(onClick = {
+                                isEditing = true
+                                selectedUser = user
+                                name = user.nombre
+                                email = user.email
+                                phone = user.telefono
+                                showDialog = true
+                            }) {
+                                Icon(Icons.Default.Edit, contentDescription = "Editar usuario")
+                            }
+                            IconButton(onClick = {
+                                selectedUser = user
+                                vm.deleteUsuario(token, user.idUsuario!!)
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Eliminar usuario")
+                            }
+                        }
                     }
                 }
             }
         }
-        if (showAddDialog) {
+
+        if (showDialog) {
             AlertDialog(
-                onDismissRequest = { showAddDialog = false },
-                title = { Text("Nuevo Usuario") },
+                onDismissRequest = { showDialog = false },
+                title = { Text(if (isEditing) "Editar Usuario" else "Nuevo Usuario") },
                 text = {
                     Column {
                         OutlinedTextField(
@@ -87,42 +121,36 @@ fun UsuarioScreen(
                             label = { Text("Nombre") },
                             modifier = Modifier.fillMaxWidth()
                         )
+                        Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = email,
                             onValueChange = { email = it },
                             label = { Text("Email") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp)
+                            modifier = Modifier.fillMaxWidth()
                         )
+                        Spacer(Modifier.height(8.dp))
                         OutlinedTextField(
                             value = phone,
                             onValueChange = { phone = it },
                             label = { Text("Teléfono") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp)
+                            modifier = Modifier.fillMaxWidth()
                         )
                     }
                 },
                 confirmButton = {
-                    TextButton(
-                        onClick = {
-                            vm.addUsuario(
-                                token,
-                                Usuario(nombre = name, email = email, telefono = phone, prestamos = emptyList())
-                            )
-                            showAddDialog = false
-                        }
-                    ) {
-                        Text("Guardar")
-                    }
+                    TextButton(onClick = {
+                        val u = Usuario(
+                            idUsuario = if (isEditing) selectedUser?.idUsuario else null,
+                            nombre = name,
+                            email = email,
+                            telefono = phone,
+                            prestamos = selectedUser?.prestamos ?: emptyList()
+                        )
+                        if (isEditing) vm.updateUsuario(token, u) else vm.addUsuario(token, u)
+                        showDialog = false
+                    }) { Text("Guardar") }
                 },
-                dismissButton = {
-                    TextButton(onClick = { showAddDialog = false }) {
-                        Text("Cancelar")
-                    }
-                }
+                dismissButton = { TextButton(onClick = { showDialog = false }) { Text("Cancelar") } }
             )
         }
     }

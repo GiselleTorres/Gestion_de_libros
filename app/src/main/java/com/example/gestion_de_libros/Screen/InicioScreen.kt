@@ -41,7 +41,7 @@ fun InicioScreen(
             ModalDrawerSheet {
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    "Menú principal",
+                    "Menu Bliblioteca municipal",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(16.dp)
                 )

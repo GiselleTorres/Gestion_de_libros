@@ -15,4 +15,15 @@ class   UsuarioRepository (private val api: ApiService) {
         val response = api.createUsuario("Bearer $token", usuario)
         return if (response.isSuccessful) response.body() else null
     }
+
+    suspend fun updateUsuario(token: String, usuario: Usuario): Usuario? {
+        val id = usuario.idUsuario ?: return null
+        val response = api.updateUsuario("Bearer $token", id, usuario)
+        return if (response.isSuccessful) response.body() else null
+    }
+
+    suspend fun deleteUsuario(token: String, id: Long): Boolean {
+        val response = api.deleteUsuario("Bearer $token", id)
+        return response.isSuccessful
+    }
 }

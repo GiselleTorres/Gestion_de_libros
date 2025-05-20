@@ -8,6 +8,8 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 interface ApiService {
+
+
     @PUT("/api/libros/{id}")
     suspend fun updateLibro(
         @Header("Authorization") token: String,
@@ -32,6 +34,19 @@ interface ApiService {
         @Header("Authorization") token: String,
         @Body categoria: Categoria
     ): Response<Categoria>
+
+    @PUT("/api/usuarios/{id}")
+    suspend fun updateUsuario(
+        @Header("Authorization") token: String,
+        @Path("id") id: Long,
+        @Body usuario: Usuario
+    ): Response<Usuario>
+
+    @DELETE("/api/usuarios/{id}")
+    suspend fun deleteUsuario(
+        @Header("Authorization") token: String,
+        @Path("id") id: Long
+    ): Response<Unit>
 
     @POST("/api/usuarios")
     suspend fun createUsuario(
