@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.example.gestion_de_libros.Model.Categoria
+import com.example.gestion_de_libros.Repository.CategoriaRepository
 import com.example.gestion_de_libros.ViewModel.CategoriaViewModel
 import com.example.gestion_de_libros.ViewModel.LibroViewModel
 import com.example.gestion_de_libros.Model.Libro
@@ -24,7 +25,8 @@ import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
-
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,23 +36,23 @@ fun LibroScreen(
     catVm: CategoriaViewModel,
     token: String
 ) {
-    // Diálogo de creación
+    // Estados para diálogos y formulario
     var showAddDialog by remember { mutableStateOf(false) }
-    // Campos del formulario
+    var showEditDialog by remember { mutableStateOf(false) }
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+    var selectedLibro by remember { mutableStateOf<Libro?>(null) }
     var title by remember { mutableStateOf("") }
     var author by remember { mutableStateOf("") }
     var year by remember { mutableStateOf("") }
     var isbn by remember { mutableStateOf("") }
 
-    // Carga de libros y categorías
+    // Carga libros y categorías
     val libros by vm.libros.collectAsState()
     val categorias by catVm.categorias.collectAsState()
     LaunchedEffect(Unit) {
         vm.loadLibros(token)
         catVm.loadCategorias(token)
     }
-
-    // Estado para dropdown de categorías
     var expanded by remember { mutableStateOf(false) }
     var selectedCategoria by remember { mutableStateOf<Categoria?>(null) }
 
@@ -64,7 +66,12 @@ fun LibroScreen(
                     }
                 },
                 actions = {
-                    IconButton(onClick = { showAddDialog = true }) {
+                    IconButton(onClick = {
+                        // Preparar formulario para nuevo libro
+                        selectedLibro = null
+                        title = ""; author = ""; year = ""; isbn = ""; selectedCategoria = null
+                        showAddDialog = true
+                    }) {
                         Icon(Icons.Default.Add, contentDescription = "Agregar libro")
                     }
                 }
@@ -83,25 +90,60 @@ fun LibroScreen(
                         .fillMaxWidth()
                         .padding(vertical = 4.dp)
                 ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(libro.titulo, style = MaterialTheme.typography.titleMedium)
-                        Spacer(Modifier.height(4.dp))
-                        Text("Autor: ${libro.autor}", style = MaterialTheme.typography.bodyMedium)
-                        Spacer(Modifier.height(2.dp))
-                        Text("Año: ${libro.añoPublicacion}", style = MaterialTheme.typography.bodySmall)
-                        Spacer(Modifier.height(2.dp))
-                        Text("ISBN: ${libro.isbn}", style = MaterialTheme.typography.bodySmall)
-                        Spacer(Modifier.height(2.dp))
-                        Text("Categoría: ${selectedCategoria?.nombre ?: "N/A"}", style = MaterialTheme.typography.bodySmall)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(libro.titulo, style = MaterialTheme.typography.titleMedium)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text("Autor: ${libro.autor}", style = MaterialTheme.typography.bodyMedium)
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text("Año: ${libro.añoPublicacion}", style = MaterialTheme.typography.bodySmall)
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text("ISBN: ${libro.isbn}", style = MaterialTheme.typography.bodySmall)
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                "Categoría: ${libro.categoria?.firstOrNull()?.nombre ?: "N/A"}",
+                                style = MaterialTheme.typography.bodySmall
+                            )
+                        }
+                        Row {
+                            IconButton(onClick = {
+                                // Editar libro
+                                selectedLibro = libro
+                                title = libro.titulo
+                                author = libro.autor
+                                year = libro.añoPublicacion.toString()
+                                isbn = libro.isbn
+                                selectedCategoria = libro.categoria?.firstOrNull()
+                                showEditDialog = true
+                            }) {
+                                Icon(Icons.Default.Edit, contentDescription = "Editar libro")
+                            }
+                            IconButton(onClick = {
+                                selectedLibro = libro
+                                showDeleteConfirm = true
+                            }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Eliminar libro")
+                            }
+                        }
                     }
                 }
             }
         }
 
-        if (showAddDialog) {
+        // Diálogo para añadir/editar
+        val isEditing = showEditDialog
+        if (showAddDialog || showEditDialog) {
             AlertDialog(
-                onDismissRequest = { showAddDialog = false },
-                title = { Text("Nuevo Libro") },
+                onDismissRequest = {
+                    showAddDialog = false
+                    showEditDialog = false
+                },
+                title = { Text(if (isEditing) "Editar Libro" else "Nuevo Libro") },
                 text = {
                     Column {
                         OutlinedTextField(
@@ -121,7 +163,7 @@ fun LibroScreen(
                         OutlinedTextField(
                             value = year,
                             onValueChange = { year = it },
-                            label = { Text("Año de publicación") },
+                            label = { Text("Año") },
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 8.dp)
@@ -137,14 +179,18 @@ fun LibroScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         ExposedDropdownMenuBox(
                             expanded = expanded,
-                            onExpandedChange = { expanded = !expanded }
+                            onExpandedChange = {
+                                expanded = !expanded
+                                if (expanded) catVm.loadCategorias(token)
+                            }
                         ) {
                             OutlinedTextField(
-                                value = selectedCategoria?.nombre ?: "Selecciona categoría",
+                                value = selectedCategoria?.nombre
+                                    ?: "Selecciona categoría",
                                 onValueChange = {},
                                 label = { Text("Categoría") },
                                 readOnly = true,
-                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
                                 modifier = Modifier.fillMaxWidth()
                             )
                             ExposedDropdownMenu(
@@ -165,24 +211,49 @@ fun LibroScreen(
                     }
                 },
                 confirmButton = {
-                    TextButton(
-                        onClick = {
-                            vm.addLibro(
-                                token,
-                                Libro(
-                                    titulo = title,
-                                    autor = author,
-                                    añoPublicacion = year.toIntOrNull() ?: 0,
-                                    isbn = isbn,
-                                    categoria = selectedCategoria?.let { listOf(it) }
-                                )
-                            )
-                            showAddDialog = false
-                        }
-                    ) { Text("Guardar") }
+                    TextButton(onClick = {
+                        val libroObj = Libro(
+                            idLibro = selectedLibro?.idLibro,
+                            titulo = title,
+                            autor = author,
+                            añoPublicacion = year.toIntOrNull() ?: 0,
+                            isbn = isbn,
+                            categoria = selectedCategoria?.let { listOf(it) }
+                        )
+                        if (isEditing) vm.updateLibro(token, libroObj) else vm.addLibro(token, libroObj)
+                        showAddDialog = false
+                        showEditDialog = false
+                    }) {
+                        Text("Guardar")
+                    }
                 },
                 dismissButton = {
-                    TextButton(onClick = { showAddDialog = false }) {
+                    TextButton(onClick = {
+                        showAddDialog = false
+                        showEditDialog = false
+                    }) {
+                        Text("Cancelar")
+                    }
+                }
+            )
+        }
+
+        // Confirmación eliminación
+        if (showDeleteConfirm) {
+            AlertDialog(
+                onDismissRequest = { showDeleteConfirm = false },
+                title = { Text("Eliminar Libro") },
+                text = { Text("¿Estás seguro de eliminar '${selectedLibro?.titulo}'?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        selectedLibro?.idLibro?.let { vm.deleteLibro(token, it) }
+                        showDeleteConfirm = false
+                    }) {
+                        Text("Eliminar")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteConfirm = false }) {
                         Text("Cancelar")
                     }
                 }

@@ -37,34 +37,28 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Inicializar Retrofit con Gson lenient
+        // Configura Retrofit con Gson lenient
         val gson = GsonBuilder().setLenient().create()
         val retrofit = Retrofit.Builder()
             .baseUrl("http://10.0.2.2:8080/")
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build()
-        val apiService = retrofit.create(ApiService::class.java)
+        val api = retrofit.create(ApiService::class.java)
 
-        // Instanciar ViewModels con sus repositorios
-        val catVm = CategoriaViewModel(CategoriaRepository(apiService))
-        val libVm = LibroViewModel(LibroRepository(apiService))
-        val presVm = PrestamoViewModel(PrestamoRepository(apiService))
-        val usrVm = UsuarioViewModel(UsuarioRepository(apiService))
+        // ViewModels
+        val catVm = CategoriaViewModel(CategoriaRepository(api))
+        val libVm = LibroViewModel(LibroRepository(api))
+        val presVm = PrestamoViewModel(PrestamoRepository(api))
+        val usrVm = UsuarioViewModel(UsuarioRepository(api))
 
-        // Token de ejemplo (debe obtenerse tras login real)
+        // Token de ejemplo
         val token = "TU_TOKEN_AQUI"
 
         setContent {
             MaterialTheme {
                 Surface {
                     val navController = rememberNavController()
-
-                    // Usamos una ruta "start" sin parámetros como startDestination
-                    NavHost(
-                        navController = navController,
-                        startDestination = "start"
-                    ) {
-                        // Pantalla inicial que redirige a inicio con token
+                    NavHost(navController, startDestination = "start") {
                         composable("start") {
                             LaunchedEffect(Unit) {
                                 navController.navigate("inicio/$token") {
@@ -73,38 +67,38 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         composable(
-                            route = "inicio/{token}",
+                            "inicio/{token}",
                             arguments = listOf(navArgument("token") { type = NavType.StringType })
-                        ) { entry ->
-                            val argToken = entry.arguments?.getString("token").orEmpty()
+                        ) { backStack ->
+                            val argToken = backStack.arguments?.getString("token").orEmpty()
                             InicioScreen(navController, argToken)
                         }
                         composable(
-                            route = "categorias/{token}",
+                            "categorias/{token}",
                             arguments = listOf(navArgument("token") { type = NavType.StringType })
-                        ) { entry ->
-                            val argToken = entry.arguments?.getString("token").orEmpty()
+                        ) { backStack ->
+                            val argToken = backStack.arguments?.getString("token").orEmpty()
                             CategoriaScreen(navController, catVm, argToken)
                         }
                         composable(
-                            route = "libros/{token}",
+                            "libros/{token}",
                             arguments = listOf(navArgument("token") { type = NavType.StringType })
-                        ) { entry ->
-                            val argToken = entry.arguments?.getString("token").orEmpty()
+                        ) { backStack ->
+                            val argToken = backStack.arguments?.getString("token").orEmpty()
                             LibroScreen(navController, libVm, catVm, argToken)
                         }
                         composable(
-                            route = "prestamos/{token}",
+                            "prestamos/{token}",
                             arguments = listOf(navArgument("token") { type = NavType.StringType })
-                        ) { entry ->
-                            val argToken = entry.arguments?.getString("token").orEmpty()
+                        ) { backStack ->
+                            val argToken = backStack.arguments?.getString("token").orEmpty()
                             PrestamoScreen(navController, presVm, argToken)
                         }
                         composable(
-                            route = "usuarios/{token}",
+                            "usuarios/{token}",
                             arguments = listOf(navArgument("token") { type = NavType.StringType })
-                        ) { entry ->
-                            val argToken = entry.arguments?.getString("token").orEmpty()
+                        ) { backStack ->
+                            val argToken = backStack.arguments?.getString("token").orEmpty()
                             UsuarioScreen(navController, usrVm, argToken)
                         }
                     }
@@ -113,6 +107,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-
-

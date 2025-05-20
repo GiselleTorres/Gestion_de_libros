@@ -15,6 +15,19 @@ class LibroRepository (private val api: ApiService){
         return if (response.isSuccessful) response.body() else null
     }
 
+    // Método para actualizar un libro
+    suspend fun updateLibro(token: String, libro: Libro): Libro? {
+        val id = libro.idLibro ?: return null
+        val response = api.updateLibro("Bearer $token", id, libro)
+        return if (response.isSuccessful) response.body() else null
+    }
+
+    // Método para eliminar un libro
+    suspend fun deleteLibro(token: String, id: Long): Boolean {
+        val response = api.deleteLibro("Bearer $token", id)
+        return response.isSuccessful
+    }
+
 }
 
 

@@ -21,4 +21,14 @@ class CategoriaViewModel (private val repo: CategoriaRepository): ViewModel () {
             _categorias.value = repo.fetchCategorias(token)
         }
     }
+
+    //método para agregar una categoría
+    fun addCategoria(token: String, categoria: Categoria, onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            val created = repo.createCategoria(token, categoria)
+            onResult(created != null)
+            // Recarga la lista tras crear
+            loadCategorias(token)
+        }
+    }
 }

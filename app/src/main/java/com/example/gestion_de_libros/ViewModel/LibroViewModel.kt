@@ -31,4 +31,22 @@ class LibroViewModel (private val repo: LibroRepository) : ViewModel() {
             loadLibros(token)
         }
     }
+
+    // Método para actualizar un libro
+    fun updateLibro(token: String, libro: Libro, onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            val updated = repo.updateLibro(token, libro)
+            onResult(updated != null)
+            loadLibros(token)
+        }
+    }
+
+    // Método para eliminar un libro
+    fun deleteLibro(token: String, id: Long, onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            val success = repo.deleteLibro(token, id)
+            onResult(success)
+            loadLibros(token)
+        }
+    }
 }
