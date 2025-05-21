@@ -21,6 +21,14 @@ class PrestamoViewModel (private val repo: PrestamoRepository) : ViewModel() {
             _prestamos.value = repo.fetchPrestamos(token)
         }
     }
+
+    fun addPrestamo(token: String, prestamo: Prestamo, onResult: (Boolean) -> Unit = {}) {
+        viewModelScope.launch {
+            val created = repo.createPrestamo(token, prestamo)
+            onResult(created != null)
+            loadPrestamos(token)
+        }
+    }
 }
 
 

@@ -9,6 +9,11 @@ class PrestamoRepository (private val api: ApiService) {
     suspend fun fetchPrestamo(id: Long, token: String): Prestamo? =
         api.getPrestamo(id, "Bearer $token").body()
 
+    suspend fun createPrestamo(token: String, prestamo: Prestamo): Prestamo? {
+        val response = api.createPrestamo("Bearer $token", prestamo)
+        return if (response.isSuccessful) response.body() else null
+    }
+
 }
 
 
