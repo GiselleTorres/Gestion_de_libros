@@ -24,6 +24,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.clickable
+import androidx.compose.material.icons.filled.ExitToApp
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,7 +33,6 @@ fun InicioScreen(
     navController: NavController,
     token: String
 ) {
-    // Drawer state
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -41,7 +42,7 @@ fun InicioScreen(
             ModalDrawerSheet {
                 Spacer(Modifier.height(16.dp))
                 Text(
-                    "Menu Bliblioteca municipal",
+                    "Menú principal",
                     style = MaterialTheme.typography.titleLarge,
                     modifier = Modifier.padding(16.dp)
                 )
@@ -91,6 +92,34 @@ fun InicioScreen(
                     ) {
                         Text("Categorías")
                     }
+
+                    Spacer(Modifier.weight(1f))
+                    Divider()
+                    // Logout button at bottom
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                scope.launch {
+                                    drawerState.close()
+                                    navController.navigate("login") {
+                                        popUpTo("login") { inclusive = true }
+                                    }
+                                }
+                            }
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ExitToApp,
+                            contentDescription = "Cerrar sesión"
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            "Cerrar sesión",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
                 }
             }
         }
@@ -106,15 +135,15 @@ fun InicioScreen(
                     title = { Text("Inicio") }
                 )
             }
-        ) { paddingValues ->
+        ) { padding ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(paddingValues),
+                    .padding(padding),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    "Seleccione una opción del menú lateral",
+                    "Seleccione una opción desde el menú lateral",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
