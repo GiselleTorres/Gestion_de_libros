@@ -1,5 +1,6 @@
 package com.example.gestion_de_libros.Screen
 
+
 import android.app.Activity
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -16,7 +17,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(
+fun RegistroScreen(
     navController: NavController,
     authVm: LoginViewModel = viewModel()
 ) {
@@ -28,16 +29,17 @@ fun LoginScreen(
     val token by authVm.token.collectAsState()
     val error by authVm.error.collectAsState()
 
+    // Redirigir al inicio si el registro fue exitoso
     LaunchedEffect(token) {
         token?.let {
             navController.navigate("inicio/$it") {
-                popUpTo("login") { inclusive = true }
+                popUpTo("register") { inclusive = true }
             }
         }
     }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Iniciar sesión") }) }
+        topBar = { TopAppBar(title = { Text("Registro") }) }
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -63,17 +65,17 @@ fun LoginScreen(
             )
             Spacer(Modifier.height(16.dp))
             Button(
-                onClick = { authVm.login(email.trim(), password) },
+                onClick = { authVm.register(email.trim(), password) },
                 enabled = email.isNotBlank() && password.isNotBlank(),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Ingresar")
+                Text("Registrarse")
             }
 
             Spacer(Modifier.height(8.dp))
             Text(
-                text = "¿No tienes cuenta? Regístrate",
-                modifier = Modifier.clickable { navController.navigate("register") },
+                text = "¿Ya tienes cuenta? Inicia sesión",
+                modifier = Modifier.clickable { navController.navigate("login") },
                 color = MaterialTheme.colorScheme.primary
             )
 
@@ -84,7 +86,6 @@ fun LoginScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            // ✅ Botón para cerrar la aplicación
             Button(
                 onClick = { activity?.finishAffinity() },
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
