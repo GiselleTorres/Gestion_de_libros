@@ -4,8 +4,8 @@ import java.time.LocalDate;
 
 data class Prestamo(
     val idPrestamo: Long?= null,
-    val fechaInicio: LocalDate,
-    val fechaFin: LocalDate,
-    val usuario: List<Usuario>,
-    val libro: List<Libro>
+    val fechaInicio: String,
+    val fechaFin: String,
+    val usuario: Usuario,
+    val libro: Libro
 )

@@ -84,8 +84,6 @@ fun PrestamoScreen(
                 ) {
                     Column(modifier = Modifier.padding(8.dp)) {
                         Text("ID: ${p.idPrestamo}")
-                        Text("Usuario: ${p.usuario.firstOrNull()?.nombre}")
-                        Text("Libro: ${p.libro.firstOrNull()?.titulo}")
                         Text("Inicio: ${p.fechaInicio} - Fin: ${p.fechaFin}")
                     }
                 }
@@ -173,10 +171,10 @@ fun PrestamoScreen(
                         if (selectedUser != null && selectedBook != null) {
                             val pr = Prestamo(
                                 idPrestamo = 0L,
-                                usuario = listOf(selectedUser!!),
-                                libro = listOf(selectedBook!!),
-                                fechaInicio = LocalDate.parse(startDate),
-                                fechaFin = LocalDate.parse(endDate)
+                                usuario = selectedUser!!,
+                                libro = selectedBook!!,
+                                fechaInicio = startDate,
+                                fechaFin    = endDate
                             )
                             prestamoVm.addPrestamo(token, pr)
                         }

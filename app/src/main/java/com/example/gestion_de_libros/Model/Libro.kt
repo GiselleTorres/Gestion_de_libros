@@ -6,7 +6,8 @@ data class Libro(
     val autor: String,
     val añoPublicacion: Int,
     val isbn: String,
-    val categoria: List<Categoria>?
+    val categoria: Categoria,
+    val prestamos: List<Prestamo>
 )
 
 

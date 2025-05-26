@@ -4,31 +4,25 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
-import com.example.gestion_de_libros.Model.Categoria
-import com.example.gestion_de_libros.Repository.CategoriaRepository
-import com.example.gestion_de_libros.ViewModel.CategoriaViewModel
-import com.example.gestion_de_libros.ViewModel.LibroViewModel
-import com.example.gestion_de_libros.Model.Libro
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.Card
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.gestion_de_libros.Model.Categoria
+import com.example.gestion_de_libros.ViewModel.CategoriaViewModel
+import com.example.gestion_de_libros.ViewModel.LibroViewModel
+import com.example.gestion_de_libros.Model.Libro
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.ui.tooling.preview.Preview
-
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -55,6 +49,7 @@ fun LibroScreen(
         vm.loadLibros(token)
         catVm.loadCategorias(token)
     }
+
     var expanded by remember { mutableStateOf(false) }
     var selectedCategoria by remember { mutableStateOf<Categoria?>(null) }
 
@@ -71,7 +66,11 @@ fun LibroScreen(
                     IconButton(onClick = {
                         // Preparar formulario para nuevo libro
                         selectedLibro = null
-                        title = ""; author = ""; year = ""; isbn = ""; selectedCategoria = null
+                        title = ""
+                        author = ""
+                        year = ""
+                        isbn = ""
+                        selectedCategoria = null
                         showAddDialog = true
                     }) {
                         Icon(Icons.Default.Add, contentDescription = "Agregar libro")
@@ -108,7 +107,7 @@ fun LibroScreen(
                             Text("ISBN: ${libro.isbn}", style = MaterialTheme.typography.bodySmall)
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                "Categoría: ${libro.categoria?.firstOrNull()?.nombre ?: "N/A"}",
+                                "Categoría: ${libro.categoria.nombre}",
                                 style = MaterialTheme.typography.bodySmall
                             )
                         }
@@ -120,7 +119,7 @@ fun LibroScreen(
                                 author = libro.autor
                                 year = libro.añoPublicacion.toString()
                                 isbn = libro.isbn
-                                selectedCategoria = libro.categoria?.firstOrNull()
+                                selectedCategoria = libro.categoria
                                 showEditDialog = true
                             }) {
                                 Icon(Icons.Default.Edit, contentDescription = "Editar libro")
@@ -187,8 +186,7 @@ fun LibroScreen(
                             }
                         ) {
                             OutlinedTextField(
-                                value = selectedCategoria?.nombre
-                                    ?: "Selecciona categoría",
+                                value = selectedCategoria?.nombre ?: "Selecciona categoría",
                                 onValueChange = {},
                                 label = { Text("Categoría") },
                                 readOnly = true,
@@ -214,16 +212,22 @@ fun LibroScreen(
                 },
                 confirmButton = {
                     TextButton(onClick = {
+                        // Asegurarnos de tener una categoría seleccionada
+                        val cat = selectedCategoria ?: return@TextButton
+
                         val libroObj = Libro(
-                            idLibro = selectedLibro?.idLibro,
-                            titulo = title,
-                            autor = author,
+                            idLibro        = selectedLibro?.idLibro,
+                            titulo         = title,
+                            autor          = author,
                             añoPublicacion = year.toIntOrNull() ?: 0,
-                            isbn = isbn,
-                            categoria = selectedCategoria?.let { listOf(it) }
+                            isbn           = isbn,
+                            categoria      = cat,
+                            prestamos      = selectedLibro?.prestamos ?: emptyList()
                         )
-                        if (isEditing) vm.updateLibro(token, libroObj) else vm.addLibro(token, libroObj)
-                        showAddDialog = false
+                        if (isEditing) vm.updateLibro(token, libroObj)
+                        else            vm.addLibro   (token, libroObj)
+
+                        showAddDialog  = false
                         showEditDialog = false
                     }) {
                         Text("Guardar")
